@@ -2,6 +2,19 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import ReactLoading from "react-loading";
+import Swal from "sweetalert2";
+
+const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+    }
+});
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const API_PATH = import.meta.env.VITE_API_PATH;
@@ -73,7 +86,7 @@ export default function CartPage() {
     } = useForm();
 
     const onSubmit = handleSubmit((data) => {
-        console.log(data);
+        // console.log(data);
         const { message, ...user } = data;
         const userInfo = {
             data: {
@@ -88,6 +101,10 @@ export default function CartPage() {
         setIsScreenLoading(true);
         try {
             await axios.post(`${BASE_URL}/v2/api/${API_PATH}/order`, data);
+            Toast.fire({
+                icon: "success",
+                title: "送出訂單成功"
+            });
             reset();
             getCart();
         } catch (error) {
@@ -237,7 +254,7 @@ export default function CartPage() {
                                 }
                             })}
                             id="tel"
-                            type="text"
+                            type="tel"
                             className={`form-control ${errors.tel ? "is-invalid" : ""}`}
                             placeholder="請輸入電話"
                         />
@@ -266,7 +283,7 @@ export default function CartPage() {
                             rows="10">
                         </textarea>
                     </div>
-                    <button type="submit" className="btn btn-primary">送出訂單</button>
+                    <button type="submit" className="btn btn-primary" disabled={cart.carts?.length === 0}>送出訂單</button>
                 </form>
             </div>
             {
